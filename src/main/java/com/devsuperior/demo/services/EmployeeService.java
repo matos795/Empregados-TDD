@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.devsuperior.demo.dto.EmployeeDTO;
 import com.devsuperior.demo.entities.Employee;
+import com.devsuperior.demo.repositories.DepartmentRepository;
 import com.devsuperior.demo.repositories.EmployeeRepository;
 
 @Service
@@ -19,6 +20,9 @@ public class EmployeeService {
 
     @Autowired
     private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private DepartmentRepository departmentRepository;
 
     @Transactional(readOnly = true)
     public Page<EmployeeDTO> findAllPaged(Pageable pageable) {
@@ -33,5 +37,17 @@ public class EmployeeService {
 ); 
 
         return sortedPage.map(x -> new EmployeeDTO(x));
+    }
+
+    @Transactional
+    public EmployeeDTO insert(EmployeeDTO dto) {
+        Employee entity = new Employee();
+        entity.setId(dto.getId());
+        entity.setName(dto.getName());
+        entity.setEmail(dto.getEmail());
+        entity.setDepartment(departmentRepository.getReferenceById(dto.getDepartmentId()));
+
+        entity = employeeRepository.save(entity);
+        return new EmployeeDTO(entity);
     }
 }
